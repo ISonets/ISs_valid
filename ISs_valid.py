@@ -8,6 +8,8 @@ isescan_cols = [0,2,3,4,5]
 blast_cols = [0,2,3,4,7]
 correct_order = ['seqID', 'Title','isBegin', 'isEnd', 'Length']
 filename_blast = '.txt'
+coverage_threshold = 1.25
+length_threshold = 0.5
 #  reading .depth and ISEscan files
 depth_file = pd.read_csv(sys.argv[1], sep = '\t', header = None, names = ['Contig', 'Coord', 'Depth'])
 folder_path = os.path.dirname(sys.argv[1])
@@ -54,8 +56,12 @@ for _, row in comb_file.iterrows():
     median_by_contig = depth_by_contig_df.loc[depth_by_contig_df['Contig'] == name, 'Depth'].values[0]
     length_by_contig = length_by_contig_df.loc[length_by_contig_df['Contig'] == name, 'Length'].values[0]
     try:
-        if (median_of_determt >= 1.25 * median_by_contig) or (length_of_determt >= 0.5 * length_by_contig) :
-            comb_file_check_result_df = pd.concat([comb_file_check_result_df,row.to_frame().T], ignore_index=True)
+        if length_of_determt >= length_threshold * length_by_contig :
+            if median_by_contig >= length_threshold * median_cov:
+                comb_file_check_result_df = pd.concat([comb_file_check_result_df, row.to_frame().T], ignore_index=True)
+        else:
+            if median_of_determt >= length_threshold * median_by_contig:
+                comb_file_check_result_df = pd.concat([comb_file_check_result_df, row.to_frame().T], ignore_index=True)
     except:
         pass
 filename_comb_file_check_res = os.path.join(folder_path, 'determinants_verified' + '.csv')
